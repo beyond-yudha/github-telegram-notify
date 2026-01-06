@@ -1,0 +1,50 @@
+name: Deployment Notify to Telegram
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (dev/staging/prod)"
+        required: true
+        default: "prod"
+      status:
+        description: "Status deploy (success/failed)"
+        required: true
+        type: choice
+        options:
+          - success
+          - failed
+      notes:
+        description: "Catatan tambahan (opsional)"
+        required: false
+        default: ""
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notif kalau deploy SUKSES
+        if: github.event.inputs.status == 'success'
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          to: ${{ secrets.TELEGRAM_TO }}
+          message: |
+            ✅ *DEPLOY BERHASIL*
+            Env    : ${{ github.event.inputs.environment }}
+            Repo   : ${{ github.repository }}
+            Actor  : ${{ github.actor }}
+            Notes  : ${{ github.event.inputs.notes }}
+
+      - name: Notif kalau deploy GAGAL
+        if: github.event.inputs.status == 'failed'
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          to: ${{ secrets.TELEGRAM_TO }}
+          message: |
+            ❌ *DEPLOY GAGAL*
+            Env    : ${{ github.event.inputs.environment }}
+            Repo   : ${{ github.repository }}
+            Actor  : ${{ github.actor }}
+            Notes  : ${{ github.event.inputs.notes }}
