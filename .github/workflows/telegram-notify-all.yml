@@ -1,0 +1,34 @@
+name: Telegram – Notif Semua Workflow
+
+on:
+  workflow_run:
+    # DAFTAR WORKFLOW YANG MAU DIPANTAU
+    # isi pakai nilai di field `name:` dari masing-masing workflow
+    workflows:
+      - Deploy Prod
+      - Deploy Staging
+      - CI
+      - Tests
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kirim notifikasi ke Telegram
+        uses: appleboy/telegram-action@v1.0.0
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🔔 Notifikasi GitHub Actions
+
+            Repo      : ${{ github.repository }}
+            Workflow  : ${{ github.event.workflow_run.name }}
+            Event     : ${{ github.event.workflow_run.event }}
+            Branch    : ${{ github.event.workflow_run.head_branch }}
+            Status    : ${{ github.event.workflow_run.conclusion }}
+            Actor     : ${{ github.event.workflow_run.actor.login }}
+            URL       : ${{ github.event.workflow_run.html_url }}
